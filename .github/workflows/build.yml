@@ -1,0 +1,67 @@
+name: Build
+
+# Compiles Tktable on each platform, builds one wheel per platform, and tests the wheels with
+# pytktable's tests. Each step is a reusable workflow in its own file.
+
+on:
+  # Also called by release.yml, to build and test the wheels it publishes.
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# A new push to the same branch or pull request cancels the older run still in progress.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile-linux:
+    uses: ./.github/workflows/compile-linux.yml
+
+  compile-macos:
+    uses: ./.github/workflows/compile-macos.yml
+
+  compile-windows:
+    uses: ./.github/workflows/compile-windows.yml
+
+  wheels:
+    name: Build wheels
+    needs: [compile-linux, compile-macos, compile-windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry and wheel
+        run: |
+          pipx install poetry
+          pip install wheel
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: compiled-*
+          path: compiled/
+
+      # Each artifact folder is named compiled-<platform tag>.
+      - name: Build one wheel per platform
+        run: |
+          for folder in compiled/compiled-*; do
+            python scripts/make_wheel.py "$folder" "${folder#compiled/compiled-}"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: dist/*.whl
+
+  test:
+    needs: [wheels]
+    uses: ./.github/workflows/test.yml

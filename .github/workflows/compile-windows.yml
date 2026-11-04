@@ -1,0 +1,46 @@
+name: Compile (Windows)
+
+on:
+  workflow_call:
+
+jobs:
+  compile:
+    name: Compile (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: win_amd64
+            runner: windows-2025
+            arch: amd64
+          # 32-bit, built on the 64-bit runner with the 32-bit compiler.
+          - platform: win32
+            runner: windows-2025
+            arch: x86
+          - platform: win_arm64
+            runner: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Set up the Visual Studio compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - run: scripts/build-windows.ps1 out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiled-${{ matrix.platform }}
+          path: out/

@@ -1,0 +1,47 @@
+name: Compile (Linux)
+
+# Compiles Tktable in the PyPA's manylinux (glibc) and musllinux (musl, e.g. Alpine) containers.
+# They use old C libraries, so the result also works on newer Linux distributions.
+
+on:
+  workflow_call:
+
+jobs:
+  compile:
+    name: Compile (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: manylinux_2_28_x86_64
+            runner: ubuntu-24.04
+            install: dnf install -y libX11-devel
+          - platform: manylinux_2_28_aarch64
+            runner: ubuntu-24.04-arm
+            install: dnf install -y libX11-devel
+          - platform: musllinux_1_2_x86_64
+            runner: ubuntu-24.04
+            install: apk add --no-cache bash libx11-dev
+          - platform: musllinux_1_2_aarch64
+            runner: ubuntu-24.04-arm
+            install: apk add --no-cache bash libx11-dev
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      # Run the container with "docker run" instead of a job container: GitHub's own actions (e.g.
+      # checkout) don't run in Alpine-based containers like musllinux. The X11 headers are for Tk.
+      - name: Compile in quay.io/pypa/${{ matrix.platform }}
+        run: >-
+          docker run --rm --volume "$PWD:/io" --workdir /io
+          "quay.io/pypa/${{ matrix.platform }}"
+          sh -c '${{ matrix.install }} &&
+          git config --global --add safe.directory "*" &&
+          PATH="/opt/python/cp313-cp313/bin:$PATH" bash scripts/build-unix.sh out'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiled-${{ matrix.platform }}
+          path: out/

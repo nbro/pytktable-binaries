@@ -1,0 +1,72 @@
+name: Release
+
+# Builds and tests the wheels, publishes them to PyPI, and creates a GitHub release with them, when
+# a version tag (e.g. 2.12.2 or 2.12.2.1) is pushed.
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  version:
+    name: Check package version and tag are equal
+    runs-on: ubuntu-24.04
+    outputs:
+      pre_release: ${{ steps.version.outputs.pre_release }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      # Final versions are numbers only, e.g. 2.12.2 or 2.12.2.1; anything else (e.g. 2.12.3rc1)
+      # is a pre-release.
+      - id: version
+        run: |
+          version="$(poetry version --short)"
+          if [[ "${{ github.ref_name }}" != "$version" ]]; then
+            echo "Tag = ${{ github.ref_name }} != $version"
+            exit 1
+          fi
+          [[ "$version" =~ ^[0-9]+(\.[0-9]+)+$ ]] || echo "pre_release=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: [version]
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-24.04
+    needs: [build]
+    environment: pypi
+    permissions:
+      id-token: write  # PyPI Trusted Publishing: no API token stored in GitHub.
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: GitHub release
+    runs-on: ubuntu-24.04
+    needs: [version, publish]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: dist/
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          allowUpdates: true
+          replacesArtifacts: true
+          updateOnlyUnreleased: true
+          generateReleaseNotes: true
+          prerelease: ${{ needs.version.outputs.pre_release == 'true' }}

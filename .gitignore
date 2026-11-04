@@ -1,0 +1,19 @@
+# Tcl/Tk sources and builds (scripts/build-*).
+/build/
+/out/
+/dist/
+
+# The compiled Tktable, copied here only to build the wheels.
+/tktable_binaries/Tktable*/
+
+__pycache__/
+
+# Local tools for the pre-commit hooks, e.g. PSScriptAnalyzer in .tools/Modules.
+/.tools/
+
+# Logs and notes saved while debugging, e.g. gh run view --log-failed > failed.txt.
+/*.log
+/*.txt
+
+# Personal Claude Code settings, e.g. approvals saved with "don't ask again".
+/.claude/settings.local.json

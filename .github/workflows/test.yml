@@ -1,0 +1,103 @@
+name: Test
+
+# Installs the wheels into a clean Python and runs pytktable's tests with them. TKTABLE_REQUIRED=1
+# makes the tests fail, instead of being skipped, if Tktable cannot be loaded.
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }}, ${{ matrix.arch }}, Python ${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel, windows-2025, windows-11-arm]
+        # On Windows, Python 3.11 uses Tcl/Tk 8.6, and Python 3.14 uses Tcl/Tk 9.0.
+        python-version: ["3.11", "3.14"]
+        # "native": the runner's own architecture.
+        arch: [native]
+        # 32-bit Python on 64-bit Windows. A different arch adds new jobs, instead of changing the
+        # existing ones.
+        include:
+          - os: windows-2025
+            python-version: "3.11"
+            arch: x86
+          - os: windows-2025
+            python-version: "3.14"
+            arch: x86
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out pytktable, whose tests are used
+        uses: actions/checkout@v7
+        with:
+          repository: nbro/tktable
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.arch == 'x86' && 'x86' || '' }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: wheels/
+
+      - name: Install the wheel of this platform, pytktable and pytest
+        run: |
+          pip install --no-index --find-links wheels/ pytktable-binaries
+          pip install . pytest
+
+      - name: Point pytktable at the installed Tktable
+        run: |
+          python -c "import tktable_binaries as t; print(f'TKTABLE_LIBRARY={t.library_dir()}')" \
+            >> "$GITHUB_ENV"
+
+      - name: Install a virtual display (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y xvfb
+
+      - name: Diagnose Tktable
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} python -m tktable
+
+      - name: Run pytktable's tests
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a' || '' }} python -m pytest -v
+        env:
+          TKTABLE_REQUIRED: "1"
+
+  test-distros:
+    name: Test (${{ matrix.image }}, ${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Fedora has no Tktable package. Alpine uses musl, so it gets the musllinux wheels.
+          - image: fedora:latest
+            runner: ubuntu-24.04
+          - image: alpine:latest
+            runner: ubuntu-24.04
+          - image: alpine:latest
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check out pytktable, whose tests are used
+        uses: actions/checkout@v7
+        with:
+          repository: nbro/tktable
+          path: pytktable
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: wheels/
+
+      # With "docker run", like in compile-linux.yml: GitHub's actions don't run in Alpine.
+      - name: Run pytktable's tests with the distribution's own Python and Tk
+        run: >-
+          docker run --rm --volume "$PWD:/io" --workdir /io "${{ matrix.image }}"
+          sh scripts/test-distro.sh

@@ -1,0 +1,3 @@
+[submodule "tktable-src"]
+	path = tktable-src
+	url = https://github.com/bohagan1/TkTable

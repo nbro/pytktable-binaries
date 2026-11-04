@@ -1,0 +1,43 @@
+name: Checks
+
+# Runs all pre-commit hooks (formatting, linting, secrets) on all files.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# A new push to the same branch or pull request cancels the older run still in progress.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: Pre-commit hooks
+    runs-on: ubuntu-24.04
+    steps:
+      # The submodule has Tktable's license, which pyproject.toml lists, so poetry install needs it.
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - run: poetry install
+
+      # The runner has PowerShell (pwsh); the PowerShell hook also needs PSScriptAnalyzer.
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .tools/Modules
+          Save-PSResource PSScriptAnalyzer -Path .tools/Modules -TrustRepository
+
+      - run: poetry run pre-commit run --all-files --show-diff-on-failure

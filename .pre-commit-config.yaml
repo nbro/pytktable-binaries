@@ -1,0 +1,55 @@
+# Install the hooks once with `poetry run pre-commit install`; then they run on every `git commit`.
+# To run them on all files, as CI does: `poetry run pre-commit run --all-files`.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 9.0.2
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.10.1
+    hooks:
+      - id: black
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: ["--strict"]
+
+  # -x: follow the files that scripts source (e.g. versions.env).
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: ["-x"]
+
+  # Indent with 4 spaces (-i 4), and keep a space after redirections, e.g. "> file" (-sr).
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
+    hooks:
+      - id: shfmt
+        args: ["--write", "-i", "4", "-sr"]
+
+  # PSScriptAnalyzer needs PowerShell (pwsh), so it runs as a local hook.
+  - repo: local
+    hooks:
+      - id: powershell
+        name: PowerShell formatting and linting (PSScriptAnalyzer)
+        entry: pwsh -NoProfile -File scripts/check-powershell.ps1
+        language: system
+        files: \.ps1$
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks

@@ -1,0 +1,27 @@
+name: Compile (macOS)
+
+on:
+  workflow_call:
+
+jobs:
+  compile:
+    name: Compile (macosx_11_0_universal2)
+    runs-on: macos-15
+    env:
+      # One library for both Intel and Apple silicon, for macOS 11 and later.
+      CFLAGS: -arch x86_64 -arch arm64 -O2
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - run: bash scripts/build-unix.sh out
+
+      - name: Check that the libraries contain both architectures
+        run: lipo -info out/Tktable*/*.dylib
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiled-macosx_11_0_universal2
+          path: out/
