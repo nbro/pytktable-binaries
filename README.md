@@ -55,7 +55,8 @@ os.environ["TKTABLE_LIBRARY"] = str(tktable_binaries.library_dir())
 - The `Build` workflow (`.github/workflows/build.yml`) does all of this on GitHub Actions: it calls
   `compile-linux.yml`, `compile-macos.yml` and `compile-windows.yml`, builds the wheels, then calls
   `test.yml`, which tests them with pytktable's tests on each platform, and on Debian, Fedora and Alpine
-  (`scripts/test-distro.sh`).
+  (`scripts/test-distro.sh`). It also runs on the 1st of every month, to catch breakage from new
+  runner images, Python or Tcl/Tk versions early.
 
 To update Tktable, check out another tag in the submodule, and set `version` in `pyproject.toml`
 to its version:
