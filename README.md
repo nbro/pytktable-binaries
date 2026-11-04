@@ -132,6 +132,30 @@ GitHub notifies the person who created the schedule when the monthly run fails. 
 GitHub disables scheduled workflows after 60 days without activity: if that happens, enable the
 `Build` workflow again in the Actions tab.
 
+### Flaky tests on Windows
+
+Sometimes a Windows test job fails because Tktable cannot be loaded right after it was installed,
+most likely while the antivirus of GitHub's runner is still scanning the new files. The error is
+then one of:
+
+- `couldn't read file ...\pkgIndex.tcl: no such file or directory`;
+- `attempt to provide package Tktable ... failed: no version of package Tktable provided`.
+
+pytktable's tests already try to load Tktable 3 times. When it still fails, they print a
+`Tktable load report` at the end of the test output: the error of every try, Tcl's stack trace,
+what Tcl knows about Tktable and which files are in `TKTABLE_LIBRARY`. The same report is printed
+when Tktable is loaded only after a failed try, so flakes are visible even in passing jobs.
+
+If the same job passes in other runs, it's a flake: rerun only the failed jobs, either from the
+run's page in the Actions tab (`Re-run jobs` > `Re-run failed jobs`) or with:
+
+```shell
+gh run rerun <run-id> --failed
+```
+
+A run can be rerun up to 30 days after it started. If a job fails the same way again and again,
+it's not a flake: read the report.
+
 ### When to change what
 
 | What happens | What to do | Where |
