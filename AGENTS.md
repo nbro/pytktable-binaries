@@ -3,7 +3,7 @@
 These apply to everyone changing this repository, people and AI coding agents alike.
 
 Read [README.md](README.md) first: it explains what this repository is, how the wheels are built
-and tested, the versioning, and how to release.
+and tested, the versioning, when to change what ("Maintenance"), and how to release.
 
 ## Rules for the build
 

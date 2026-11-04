@@ -13,8 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel, windows-2025, windows-11-arm]
-        # On Windows, Python 3.11 uses Tcl/Tk 8.6, and Python 3.14 uses Tcl/Tk 9.0.
-        python-version: ["3.11", "3.14"]
+        # On Windows, Python 3.11 uses Tcl/Tk 8.6, and Python 3.14 uses Tcl/Tk 9.0. "3.x" is the
+        # latest stable Python, so a new Python (and the Tcl/Tk it comes with) is tested as soon as
+        # it's released, e.g. by the monthly run.
+        python-version: ["3.11", "3.14", "3.x"]
         # "native": the runner's own architecture.
         arch: [native]
         # 32-bit Python on 64-bit Windows. A different arch adds new jobs, instead of changing the
