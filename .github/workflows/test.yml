@@ -77,6 +77,10 @@ jobs:
           # Fedora has no Tktable package. Alpine uses musl, so it gets the musllinux wheels.
           - image: fedora:latest
             runner: ubuntu-24.04
+          - image: debian:stable
+            runner: ubuntu-24.04
+          - image: debian:stable
+            runner: ubuntu-24.04-arm
           - image: alpine:latest
             runner: ubuntu-24.04
           - image: alpine:latest

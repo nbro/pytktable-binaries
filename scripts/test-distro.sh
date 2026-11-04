@@ -11,8 +11,12 @@ if command -v dnf > /dev/null; then
 elif command -v apk > /dev/null; then
     # Tk needs at least one font.
     apk add --no-cache python3 python3-tkinter xvfb-run font-dejavu
+elif command -v apt-get > /dev/null; then
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3 python3-tk python3-venv xvfb xauth fonts-dejavu-core
 else
-    echo "Unsupported distribution: neither dnf nor apk found" >&2
+    echo "Unsupported distribution: none of dnf, apk or apt-get found" >&2
     exit 1
 fi
 
