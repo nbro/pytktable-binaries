@@ -11,6 +11,7 @@
 Prebuilt [Tktable](https://github.com/bohagan1/TkTable), the Tcl/Tk table widget, for
 [pytktable](https://github.com/nbro/tktable), so that Python users don't need to install Tktable
 with their operating system's package manager.
+For the story behind it, see [this blog post](https://nbro.gitlab.io/python/2026/11/04/pytktable-a-spreadsheet-like-table-widget-for-tkinter-wrapping-the-tcl-tk-tktable-extension/).
 
 Each wheel contains Tktable compiled for Tcl/Tk 8.6 and for Tcl/Tk 9.0; Tcl loads the one matching
 the Tcl/Tk of the Python that runs it. The libraries don't depend on the Python version, so one
