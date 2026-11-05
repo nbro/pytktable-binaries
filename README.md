@@ -16,12 +16,46 @@ Each wheel contains Tktable compiled for Tcl/Tk 8.6 and for Tcl/Tk 9.0; Tcl load
 the Tcl/Tk of the Python that runs it. The libraries don't depend on the Python version, so one
 wheel per platform works with every Python 3.
 
-| Platform                         | Wheel tags                                         |
-|----------------------------------|----------------------------------------------------|
-| Linux with glibc (most distros)  | `manylinux_2_28_x86_64`, `manylinux_2_28_aarch64`  |
-| Linux with musl (e.g. Alpine)    | `musllinux_1_2_x86_64`, `musllinux_1_2_aarch64`    |
-| macOS 11+, Intel and Apple silicon | `macosx_11_0_universal2`                         |
-| Windows                          | `win_amd64`, `win32`, `win_arm64`                  |
+| Platform                           | Wheel tags                                        | Tested on (CI)                         |
+|------------------------------------|---------------------------------------------------|----------------------------------------|
+| Linux with glibc (most distros)    | `manylinux_2_28_x86_64`, `manylinux_2_28_aarch64` | Ubuntu 24.04, Debian (x86_64, ARM64), Fedora (x86_64) |
+| Linux with musl (e.g. Alpine)      | `musllinux_1_2_x86_64`, `musllinux_1_2_aarch64`   | Alpine (x86_64, ARM64)                 |
+| macOS 11+, Intel and Apple silicon | `macosx_11_0_universal2`                          | macOS 15 (Intel, Apple silicon)        |
+| Windows                            | `win_amd64`, `win32`, `win_arm64`                 | Windows Server 2025 (x64, x86), Windows 11 (ARM64) |
+
+### Python and Tcl/Tk versions
+
+Which Tcl/Tk a Python uses depends on how it was installed, and the wheels work with both 8.6 and
+9.0, so you don't need to care about it. For example:
+
+| Python                             | Tcl/Tk                                            |
+|------------------------------------|---------------------------------------------------|
+| 3.11 to 3.13, python.org installers for Windows | 8.6                                  |
+| 3.14 and newer, python.org installers for Windows | 9.0                                |
+| Linux distributions                | the distribution's, e.g. 8.6 on Ubuntu 24.04 and 9.0 on Fedora |
+
+### Where Tktable comes from
+
+Tktable was created by Roland King in 1994, and then developed and maintained for many years by
+Jeffrey Hobbs, with its releases on [SourceForge](https://sourceforge.net/projects/tktable/), the
+last one being 2.10, from 2008. The wheels are built from a release tag of
+[bohagan1/TkTable](https://github.com/bohagan1/TkTable), by Brian O'Hagan, which continues it and
+seems to be the only version that is still maintained. Other, more recent versions than
+SourceForge's are:
+
+- [chpock/tktable](https://github.com/chpock/tktable);
+- [wjoye/tktable](https://github.com/wjoye/tktable);
+- [apnadkarni/tktable](https://github.com/apnadkarni/tktable), a snapshot used for
+  [Magicsplat Tcl/Tk](https://magicsplat.com/tcl-installer).
+
+### Why a separate package
+
+Python packages are distributed as wheels, i.e. zip files that `pip` installs. pytktable is pure
+Python, so it needs a single wheel that works everywhere, while compiled code needs one wheel per
+operating system and architecture. Keeping the compiled part in this separate package doesn't
+clutter pytktable's repo, and `pip install "pytktable[binary]"` installs both. `psycopg` does the
+same: `psycopg[binary]` installs its compiled part from `psycopg-binary` (see its
+[installation documentation](https://www.psycopg.org/psycopg3/docs/basic/install.html)).
 
 ### Possible future platforms
 
