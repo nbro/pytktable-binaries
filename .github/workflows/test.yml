@@ -76,8 +76,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Fedora has no Tktable package. Alpine uses musl, so it gets the musllinux wheels.
+          # Fedora, RHEL and its rebuilds have no Tktable package. Alpine uses musl, so it gets the
+          # musllinux wheels.
           - image: fedora:latest
+            runner: ubuntu-24.04
+          - image: quay.io/centos/centos:stream10
+            runner: ubuntu-24.04
+          - image: rockylinux:9
+            runner: ubuntu-24.04
+          - image: opensuse/tumbleweed
+            runner: ubuntu-24.04
+          - image: kalilinux/kali-rolling
             runner: ubuntu-24.04
           - image: debian:stable
             runner: ubuntu-24.04

@@ -19,7 +19,7 @@ wheel per platform works with every Python 3.
 
 | Platform                           | Wheel tags                                        | Tested on (CI)                         |
 |------------------------------------|---------------------------------------------------|----------------------------------------|
-| Linux with glibc (most distros)    | `manylinux_2_28_x86_64`, `manylinux_2_28_aarch64` | Ubuntu 24.04, Debian (x86_64, ARM64), Fedora (x86_64) |
+| Linux with glibc (most distros)    | `manylinux_2_28_x86_64`, `manylinux_2_28_aarch64` | Ubuntu 24.04, Debian (x86_64, ARM64), Fedora, CentOS Stream 10, Rocky Linux 9, openSUSE Tumbleweed, Kali Linux (x86_64) |
 | Linux with musl (e.g. Alpine)      | `musllinux_1_2_x86_64`, `musllinux_1_2_aarch64`   | Alpine (x86_64, ARM64)                 |
 | macOS 11+, Intel and Apple silicon | `macosx_11_0_universal2`                          | macOS 15 (Intel, Apple silicon)        |
 | Windows                            | `win_amd64`, `win32`, `win_arm64`                 | Windows Server 2025 (x64, x86), Windows 11 (ARM64) |
@@ -42,27 +42,39 @@ Jeffrey Hobbs, with its releases on [SourceForge](https://sourceforge.net/projec
 last one being 2.10, from 2008. The wheels are built from a release tag of
 [bohagan1/TkTable](https://github.com/bohagan1/TkTable), by Brian O'Hagan, which continues it and
 seems to be the only version that is still maintained. Other, more recent versions than
-SourceForge's are:
+SourceForge's are listed below, as of November 2026. They're developed independently, so a fix in
+one isn't necessarily in the others.
 
-- [chpock/tktable](https://github.com/chpock/tktable);
-- [wjoye/tktable](https://github.com/wjoye/tktable);
-- [apnadkarni/tktable](https://github.com/apnadkarni/tktable), a snapshot used for
-  [Magicsplat Tcl/Tk](https://magicsplat.com/tcl-installer).
+| Repository | Latest version | Last commit | Notes |
+|---|---|---|---|
+| [bohagan1/TkTable](https://github.com/bohagan1/TkTable) | 2.12.2 (tag `tktable-2-12-2`) | 2026 | Used for these wheels |
+| [chpock/tktable](https://github.com/chpock/tktable) | 2.11.1 (tag `v2.11.1`) | 2024 | |
+| [wjoye/tktable](https://github.com/wjoye/tktable) | 2.10.8 (tag `v2.10.8`) | 2023 | |
+| [apnadkarni/tktable](https://github.com/apnadkarni/tktable) | 2.11 (tag `magicsplat-1.8.0`) | 2017 | Snapshot used for [Magicsplat Tcl/Tk](https://magicsplat.com/tcl-installer) |
+
+Because of these differences, Tktable from other sources (e.g. Linux distributions, MacPorts,
+Magicsplat) can behave slightly differently from the one in these wheels, e.g. in the default
+colors of the title rows.
 
 ### Why a separate package
 
 Python packages are distributed as wheels, i.e. zip files that `pip` installs. pytktable is pure
 Python, so it needs a single wheel that works everywhere, while compiled code needs one wheel per
-operating system and architecture. Keeping the compiled part in this separate package doesn't
-clutter pytktable's repo, and `pip install "pytktable[binary]"` installs both. `psycopg` does the
-same: `psycopg[binary]` installs its compiled part from `psycopg-binary` (see its
-[installation documentation](https://www.psycopg.org/psycopg3/docs/basic/install.html)).
+operating system and architecture. Keeping the compiled part in this separate package, built in
+this separate repo, doesn't clutter pytktable's repo, and `pip install "pytktable[binary]"`
+installs both.
+psycopg 3 also ships its compiled part as a separate package, `psycopg-binary`, which its `binary`
+extra installs (see its
+[pyproject.toml](https://github.com/psycopg/psycopg/blob/master/psycopg/pyproject.toml)), but it
+builds it in the same repo as the rest of psycopg.
 
 ### Possible future platforms
 
 - Linux on other CPUs: 32-bit ARM (`armv7l`, older Raspberry Pi OS), `ppc64le`, `s390x`,
   `riscv64`. They would be compiled under emulation, which is slow.
-- Linux with glibc older than 2.28 (`manylinux2014`): only end-of-life distributions, e.g. CentOS 7.
+- Linux with glibc older than 2.28 (`manylinux2014`): only end-of-life distributions, e.g. CentOS 7
+  (glibc 2.17). RHEL, CentOS Stream, Rocky Linux and AlmaLinux 8 and newer have glibc 2.28 or
+  newer, so they already use the `manylinux_2_28` wheels.
 - macOS older than 11.
 - PyPy: the wheels don't depend on the Python version, so they should already work; it would need
   a test job.
