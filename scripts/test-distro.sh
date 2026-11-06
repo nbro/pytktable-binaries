@@ -9,10 +9,21 @@ set -eu
 # The Python to use: the distribution's python3, unless it's older than pytktable requires.
 PYTHON=python3
 
-if command -v dnf > /dev/null && grep -q '^PLATFORM_ID="platform:el9"' /etc/os-release; then
+# The X server the tests' Tk windows use: "xvfb" (Xvfb, a standalone X server in memory) or
+# "xwayland" (Xwayland on a headless Wayland compositor, started by xwfb-run from xwayland-run).
+# Tk has no native Wayland support, so on Wayland desktops it always runs through Xwayland.
+DISPLAY_SERVER="${DISPLAY_SERVER:-xvfb}"
+
+if command -v dnf > /dev/null && grep -q '^PLATFORM_ID="platform:el10"' /etc/os-release; then
+    # RHEL 10 and its rebuilds (e.g. CentOS Stream 10) have no Xvfb, only Xwayland.
+    dnf install -y python3 python3-tkinter xwayland-run
+    DISPLAY_SERVER=xwayland
+elif command -v dnf > /dev/null && grep -q '^PLATFORM_ID="platform:el9"' /etc/os-release; then
     # RHEL 9 and its rebuilds (e.g. Rocky Linux 9): python3 is 3.9, so use their Python 3.12.
     dnf install -y python3.12 python3.12-tkinter xorg-x11-server-Xvfb
     PYTHON=python3.12
+elif command -v dnf > /dev/null && [ "$DISPLAY_SERVER" = xwayland ]; then
+    dnf install -y python3 python3-tkinter xwayland-run
 elif command -v dnf > /dev/null; then
     dnf install -y python3 python3-tkinter xorg-x11-server-Xvfb
 elif command -v zypper > /dev/null; then
@@ -41,5 +52,17 @@ TKTABLE_LIBRARY="$(/venv/bin/python -c "import tktable_binaries as t; print(t.li
 export TKTABLE_LIBRARY
 export TKTABLE_REQUIRED=1
 
-xvfb-run -a /venv/bin/python -m tktable
-xvfb-run -a /venv/bin/python -m pytest -v
+# Runs a command with an X server for Tk's windows.
+with_display() {
+    if [ "$DISPLAY_SERVER" = xwayland ]; then
+        # The Wayland compositor needs a runtime folder, which containers don't have.
+        XDG_RUNTIME_DIR="$(mktemp -d)"
+        export XDG_RUNTIME_DIR
+        xwfb-run -- "$@"
+    else
+        xvfb-run -a "$@"
+    fi
+}
+
+with_display /venv/bin/python -m tktable
+with_display /venv/bin/python -m pytest -v
