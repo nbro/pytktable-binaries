@@ -1,8 +1,9 @@
 # Platforms
 
 Each wheel contains Tktable compiled for Tcl/Tk 8.6 and for Tcl/Tk 9.0; Tcl loads the one matching
-the Tcl/Tk of the Python that runs it. The libraries don't depend on the Python version, so one
-wheel per platform works with every Python 3.
+the Tcl/Tk of the Python that runs it. These compiled Tktable libraries are loaded by Tcl, not by
+Python, so they don't depend on the Python version: one wheel per platform (tagged `py3-none`)
+works with every supported Python, i.e. 3.11 and newer, like pytktable.
 
 | Platform                           | Wheel tags                                        | Tested on (CI)                         |
 |------------------------------------|---------------------------------------------------|----------------------------------------|

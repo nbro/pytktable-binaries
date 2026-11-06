@@ -12,13 +12,13 @@ one isn't necessarily in the others.
 
 | Repository | Latest version | Last commit | Notes |
 |---|---|---|---|
-| [bohagan1/TkTable](https://github.com/bohagan1/TkTable) | 2.12.2 (tag `tktable-2-12-2`) | 2026 | Used for these wheels |
+| [bohagan1/TkTable](https://github.com/bohagan1/TkTable) | 2.12.2 (tag `tktable-2-12-2`) | 2026 | Used for these wheels, and by Magicsplat Tcl/Tk (Tktable 2.12.1 in its releases 1.18.0 and 2.0.7) |
 | [chpock/tktable](https://github.com/chpock/tktable) | 2.11.1 (tag `v2.11.1`) | 2024 | |
 | [wjoye/tktable](https://github.com/wjoye/tktable) | 2.10.8 (tag `v2.10.8`) | 2023 | |
-| [apnadkarni/tktable](https://github.com/apnadkarni/tktable) | 2.11 (tag `magicsplat-1.8.0`) | 2017 | Snapshot used for [Magicsplat Tcl/Tk](https://magicsplat.com/tcl-installer) |
+| [apnadkarni/tktable](https://github.com/apnadkarni/tktable) | 2.11 (tag `magicsplat-1.8.0`) | 2017 | Obsolete: [Magicsplat Tcl/Tk](https://magicsplat.com/tcl-installer) used it, but [switched to bohagan1/TkTable](https://github.com/bohagan1/TkTable/issues/17#issuecomment-6676401009) |
 
 Because of these differences, Tktable from other sources (e.g. Linux distributions, MacPorts,
-Magicsplat) can behave slightly differently from the one in these wheels, e.g. in the default
+older Magicsplat releases) can behave slightly differently from the one in these wheels, e.g. in the default
 colors of the title rows.
 
 ## Why a separate package
