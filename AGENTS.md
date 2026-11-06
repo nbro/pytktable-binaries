@@ -2,8 +2,9 @@
 
 These apply to everyone changing this repository, people and AI coding agents alike.
 
-Read [README.md](README.md) first: it explains what this repository is, how the wheels are built
-and tested, the versioning, when to change what ("Maintenance"), and how to release.
+Read [README.md](README.md) first, and the docs it links to: what this repository is, how the
+wheels are built and tested, the versioning, when to change what ("Maintenance"), and how to
+release.
 
 ## Rules for the build
 
@@ -19,7 +20,7 @@ and tested, the versioning, when to change what ("Maintenance"), and how to rele
 
 ## Releases
 
-Only the maintainer tags, pushes tags, and publishes releases ([Releasing](README.md#releasing)).
+Only the maintainer tags, pushes tags, and publishes releases ([Releasing](docs/releasing.md)).
 AI agents must not.
 
 ## Readability first
@@ -37,7 +38,8 @@ AI agents must not.
 
 - Use reliable, stable tools. No betas, and no new tool when an existing one does the job.
 - Use LF line endings for every file (`.gitattributes`).
-- Run `poetry run pre-commit run --all-files` before pushing (see "Development" in `README.md`).
+- Run `poetry run pre-commit run --all-files` before pushing (see
+  [Development](docs/development.md)).
 
 ## Commits
 

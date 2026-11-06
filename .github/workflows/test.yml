@@ -71,13 +71,28 @@ jobs:
           TKTABLE_REQUIRED: "1"
 
   test-distros:
-    name: Test (${{ matrix.image }}, ${{ matrix.runner }})
+    name: Test (${{ matrix.image }}, ${{ matrix.runner }}, ${{ matrix.display || 'xvfb' }})
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Fedora has no Tktable package. Alpine uses musl, so it gets the musllinux wheels.
+          # Fedora, RHEL and its rebuilds have no Tktable package. Alpine uses musl, so it gets the
+          # musllinux wheels.
           - image: fedora:latest
+            runner: ubuntu-24.04
+          # Xwayland too, as on Fedora's desktop, where Tk runs through Xwayland.
+          - image: fedora:latest
+            runner: ubuntu-24.04
+            display: xwayland
+          # CentOS Stream 10 (like RHEL 10) has no Xvfb: test-distro.sh uses Xwayland there.
+          - image: quay.io/centos/centos:stream10
+            runner: ubuntu-24.04
+            display: xwayland
+          - image: rockylinux:9
+            runner: ubuntu-24.04
+          - image: opensuse/tumbleweed
+            runner: ubuntu-24.04
+          - image: kalilinux/kali-rolling
             runner: ubuntu-24.04
           - image: debian:stable
             runner: ubuntu-24.04
@@ -105,5 +120,6 @@ jobs:
       # With "docker run", like in compile-linux.yml: GitHub's actions don't run in Alpine.
       - name: Run pytktable's tests with the distribution's own Python and Tk
         run: >-
-          docker run --rm --volume "$PWD:/io" --workdir /io "${{ matrix.image }}"
+          docker run --rm --volume "$PWD:/io" --workdir /io
+          --env DISPLAY_SERVER=${{ matrix.display || 'xvfb' }} "${{ matrix.image }}"
           sh scripts/test-distro.sh
