@@ -22,10 +22,32 @@ GitHub disables scheduled workflows after 60 days without activity: if that happ
 |---|---|---|
 | Tktable (bohagan1/TkTable) releases a new version | Check out its tag in the submodule, set `version` in `pyproject.toml` to its version, and release | `tktable-src`, `pyproject.toml` |
 | This package needs a fix or a new platform, with the same Tktable | Fix it, and release with a fourth version number, e.g. `2.12.2.1` | Depends on the fix |
-| A new Tcl/Tk patch or minor version, e.g. 8.6.19 or 9.1 | Nothing: the libraries use Tcl's stubs, so they work with any 8.6.x and 9.x. Optionally update the tags the builds use | `versions.env` |
+| A new Tcl/Tk patch or minor version, e.g. 8.6.19 or 9.1 | Nothing: the libraries use Tcl's stubs, so they work with it (see [Which Tcl/Tk versions a build works with](#which-tcltk-versions-a-build-works-with)). Update a patch version in `versions.env` only if needed, and don't move to a new minor version | `versions.env` |
 | A Python (or a Linux distribution) switches from Tcl/Tk 8.6 to 9 | Nothing: each wheel contains both builds, and `pkgIndex.tcl` loads the one matching the running Tcl | - |
 | A Python ships a new Tcl/Tk major version, e.g. Tcl 10 (the monthly run fails) | Tktable must support it upstream: its C code, and its `pkgIndex.tcl.in`, which only knows Tcl 8 and 9. Then add a third build, pin that Python in the test matrix, and release | `versions.env`, `scripts/build-*`, `scripts/collect.py`, `.github/workflows/test.yml` |
 | Tk changes how it works, e.g. native Wayland instead of X11 | Tktable must support it upstream; then update the submodule and release | `tktable-src` |
+
+## Which Tcl/Tk versions a build works with
+
+Tktable is built with Tcl's stubs against the Tcl/Tk sources pinned in `versions.env` (8.6 and
+9.0). A build against stubs works with the version it was built against and every later one of the
+same major version, but not with earlier ones:
+
+| Built against | Works with | Doesn't work with |
+|---|---|---|
+| 8.6 (now) | 8.6.x | 8.5 and older, 9.x (that's the 9.0 build's job) |
+| 9.0 (now) | 9.0, 9.1, 9.2, ... | 8.x |
+| 9.1 (if `versions.env` were bumped) | 9.1, 9.2, ... | 9.0, e.g. Python 3.14's python.org installers |
+
+So:
+
+- a new Tcl/Tk minor version in a Python or a distribution (e.g. 9.1) doesn't break the wheels;
+- bumping `versions.env` to a newer minor version (e.g. 9.1) breaks every user of the older one
+  (9.0). Do it only to drop support for it, and say so in the release notes;
+- the Python 3.11 and 3.14 test jobs check the oldest supported versions, 8.6 and 9.0, with
+  python.org's builds: keep them as long as those Pythons ship them. `3.x` checks the newest. If a
+  later 3.14.x moved to 9.1, no job would test 9.0 anymore: then pin another Python with 9.0, or
+  accept it.
 
 `pkgIndex.tcl` is not ours: Tktable's build generates it from Tktable's `pkgIndex.tcl.in`, and
 `scripts/collect.py` checks that the Tcl 8 and Tcl 9 builds generated the same one.
