@@ -42,11 +42,14 @@ os.environ["TKTABLE_LIBRARY"] = str(tktable_binaries.library_dir())
 - [Building](docs/building.md): how the wheels are built, and how to update Tktable.
 - [Testing](docs/testing.md): how the wheels are tested, the X servers Tk needs on Linux, and flaky
   tests.
-- [Versioning](docs/versioning.md)
 - [Development](docs/development.md): tools and checks.
 - [Maintenance](docs/maintenance.md): what is checked automatically, and when to change what.
-- [Releasing](docs/releasing.md)
-- [AI assistance](docs/ai-assistance.md)
+- [Versioning and releasing](docs/releasing.md): version numbers, and how to publish a release.
+
+## AI assistance
+
+This repository was created with the help of [Claude](https://claude.ai) (Anthropic). The
+maintainer reviewed the changes, but not always thoroughly. Please report any problem you find.
 
 ## License
 
