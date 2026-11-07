@@ -6,7 +6,7 @@
 name = "pytktable-binaries"
 # The version of Tktable it contains, plus a fourth number for fixes of this package with the
 # same Tktable (e.g. 2.12.2.1). See "Versioning" in README.md.
-version = "2.12.2"
+version = "2.12.2.1"
 description = "Prebuilt Tktable, the Tcl/Tk table widget, for pytktable."
 readme = "README.md"
 requires-python = ">=3.11"
